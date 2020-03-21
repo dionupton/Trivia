@@ -1,4 +1,4 @@
-package com.udemy.trivia.controller;
+package com.zav.trivia.controller;
 
 import android.app.Application;
 

@@ -1,4 +1,4 @@
-package com.udemy.trivia.model;
+package com.zav.trivia.model;
 
 public class Question {
     private String answer;

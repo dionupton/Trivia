@@ -1,4 +1,4 @@
-package com.udemy.trivia.data;
+package com.zav.trivia.data;
 
 import android.util.Log;
 
@@ -6,8 +6,8 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.udemy.trivia.controller.AppController;
-import com.udemy.trivia.model.Question;
+import com.zav.trivia.controller.AppController;
+import com.zav.trivia.model.Question;
 
 import org.json.JSONArray;
 import org.json.JSONException;

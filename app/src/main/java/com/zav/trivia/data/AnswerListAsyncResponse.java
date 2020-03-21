@@ -1,6 +1,6 @@
-package com.udemy.trivia.data;
+package com.zav.trivia.data;
 
-import com.udemy.trivia.model.Question;
+import com.zav.trivia.model.Question;
 
 import java.util.ArrayList;
 

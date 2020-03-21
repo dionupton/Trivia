@@ -1,4 +1,4 @@
-package com.udemy.trivia;
+package com.zav.trivia;
 
 import android.content.Context;
 
@@ -22,6 +22,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
-        assertEquals("com.udemy.trivia", appContext.getPackageName());
+        assertEquals("com.zav.trivia", appContext.getPackageName());
     }
 }

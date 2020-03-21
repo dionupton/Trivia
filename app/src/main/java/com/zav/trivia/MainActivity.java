@@ -1,17 +1,16 @@
-package com.udemy.trivia;
+package com.zav.trivia;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.udemy.trivia.data.AnswerListAsyncResponse;
-import com.udemy.trivia.data.QuestionBank;
-import com.udemy.trivia.model.Question;
+import com.zav.trivia.data.AnswerListAsyncResponse;
+import com.zav.trivia.data.QuestionBank;
+import com.zav.trivia.model.Question;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 UpdateQuestion();
                 break;
             case R.id.trueButton:
+                //
                 break;
             case R.id.falseButton:
                 break;

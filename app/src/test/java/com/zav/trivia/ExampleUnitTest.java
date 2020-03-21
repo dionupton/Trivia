@@ -1,4 +1,4 @@
-package com.udemy.trivia;
+package com.zav.trivia;
 
 import org.junit.Test;
 
