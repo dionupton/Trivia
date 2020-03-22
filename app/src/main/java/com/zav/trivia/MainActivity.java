@@ -3,8 +3,10 @@ package com.zav.trivia;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -19,15 +21,20 @@ import com.zav.trivia.data.QuestionBank;
 import com.zav.trivia.model.Question;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private TextView questionTextview;
-    private TextView questionCounterTextview;
+    private TextView countdownTextView;
     private Button trueButton, falseButton;
     private ImageButton nextButton;
     private ImageButton prevButton;
+    private int currentScore = 0, highScore = 0;
+    private TextView scoreTextview, highScoreView;
+    private boolean ableToClick;
+    private CountDownTimer countdown = null;
 
     private int currentQuestionIndex = 0;
     private List<Question> questionList;
@@ -38,27 +45,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
 
-        nextButton = findViewById(R.id.next_button);
-        prevButton = findViewById(R.id.prev_button);
         trueButton = findViewById(R.id.trueButton);
         falseButton = findViewById(R.id.falseButton);
-        questionCounterTextview = findViewById(R.id.counter_text);
+        countdownTextView = findViewById(R.id.counter_text);
         questionTextview = findViewById(R.id.question_textview);
+        scoreTextview = findViewById(R.id.score_text);
+        highScoreView = findViewById(R.id.high_score_text);
 
-        nextButton.setOnClickListener(this);
-        prevButton.setOnClickListener(this);
         trueButton.setOnClickListener(this);
         falseButton.setOnClickListener(this);
 
+        SharedPreferences getShareData = getSharedPreferences("SAVES", MODE_PRIVATE);
+        highScore = getShareData.getInt("highscore", 0);
+
+        highScoreView.setText("High Score : " + Integer.toString(highScore));
 
         questionList =  new QuestionBank().getQuestions(new AnswerListAsyncResponse() {
            @Override
            public void processFinished(ArrayList<Question> questionArrayList) {
-               questionTextview.setText(questionArrayList.get(currentQuestionIndex).getAnswer());
-               questionCounterTextview.setText(currentQuestionIndex + " / " + questionArrayList.size()); //0 /234
+               Collections.shuffle(questionList);
+               questionTextview.setText(questionList.get(currentQuestionIndex).getAnswer());
+               ableToClick = true;
 
            }
        });
+
 
 
     }
@@ -66,26 +77,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
 
-        switch (view.getId()){
-            case R.id.prev_button:
-                if(currentQuestionIndex > 0){
-                    currentQuestionIndex = (currentQuestionIndex - 1) % questionList.size();
+        if(ableToClick) {
+            switch (view.getId()) {
+                case R.id.trueButton:
+                    if(countdown != null) countdown.cancel();
+
+                    ableToClick = false;
+                    CheckAnswer(true);
                     UpdateQuestion();
-                }
-                break;
-            case R.id.next_button:
-                if(currentQuestionIndex != questionList.size()-1)
-                currentQuestionIndex++;
-                UpdateQuestion();
-                break;
-            case R.id.trueButton:
-                CheckAnswer(true);
-                UpdateQuestion();
-                break;
-            case R.id.falseButton:
-                CheckAnswer(false);
-                UpdateQuestion();
-                break;
+
+                    break;
+                case R.id.falseButton:
+                    if(countdown != null) countdown.cancel();
+                    ableToClick = false;
+                    CheckAnswer(false);
+                    UpdateQuestion();
+
+                    break;
+            }
         }
     }
 
@@ -95,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int toastMessageID = 0;
 
         if(userAnswer == answerIsTrue){
-            fadeView();
+            fadeView(true);
             toastMessageID = R.string.correct_answer;
 
         }else {
@@ -109,27 +118,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void UpdateQuestion(){
         questionTextview.setText(questionList.get(currentQuestionIndex).getAnswer());
-        questionCounterTextview.setText(currentQuestionIndex + " / " + questionList.size());
     }
 
 
-    private void fadeView(){
+    private void fadeView(final boolean correct){
         final CardView cardView = findViewById(R.id.cardView);
         AlphaAnimation alphaAnimation = new AlphaAnimation(1.0f, 0.0f);
 
         alphaAnimation.setDuration(350);
-        //alphaAnimation.setRepeatCount(Animation.REVERSE);
 
         cardView.setAnimation(alphaAnimation);
 
         alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-                cardView.setCardBackgroundColor(Color.GREEN);
+                if(correct) {
+                    cardView.setCardBackgroundColor(Color.GREEN);
+                    score(true);
+                }else{
+                    cardView.setCardBackgroundColor(Color.RED);
+                }
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
+                nextQuestion();
                 reverseFade();
             }
 
@@ -144,19 +157,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         final CardView cardView = findViewById(R.id.cardView);
         AlphaAnimation alphaAnimation = new AlphaAnimation(0.0f, 1.0f);
 
-        alphaAnimation.setDuration(350);
+        alphaAnimation.setDuration(150);
 
         cardView.setAnimation(alphaAnimation);
 
         alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-
+                cardView.setCardBackgroundColor(Color.WHITE);
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                cardView.setCardBackgroundColor(Color.WHITE);
+
+
+
             }
 
             @Override
@@ -177,11 +192,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onAnimationStart(Animation animation) {
                 cardView.setCardBackgroundColor(Color.RED);
+
+                score(false);
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                cardView.setCardBackgroundColor(Color.WHITE);
+                //reverseFade();
+                //cardView.setCardBackgroundColor(Color.WHITE);
+                fadeView(false);
+                //nextQuestion();
             }
 
             @Override
@@ -190,4 +210,49 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
     }
+
+    private void nextQuestion(){
+        currentQuestionIndex++;
+        UpdateQuestion();
+        ableToClick = true;
+
+        countdown = new  CountDownTimer(7000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                countdownTextView.setText("seconds remaining: " + millisUntilFinished / 1000);
+            }
+
+            public void onFinish() {
+                countdownTextView.setText("Out of time !");
+                CheckAnswer(!questionList.get(currentQuestionIndex).isAnswerTrue());
+                UpdateQuestion();
+            }
+        }.start();
+
+
+    }
+
+    private void score(boolean correct){
+        if(correct){
+            currentScore++;
+        }else{
+            if(currentScore > 0) currentScore--;
+        }
+        scoreTextview.setText(Integer.toString(currentScore));
+
+        if(currentScore > highScore) {
+            highScore = currentScore;
+            SharedPreferences sharedPreferences = getSharedPreferences("SAVES", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt("highscore", currentScore);
+
+            editor.apply();
+            highScoreView.setText("High Score : " + Integer.toString(highScore));
+
+
+        }
+
+    }
+
+
 }
