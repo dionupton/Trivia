@@ -117,7 +117,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void UpdateQuestion(){
-        questionTextview.setText(questionList.get(currentQuestionIndex).getAnswer());
+        if(currentQuestionIndex <= questionList.size()-1){
+            questionTextview.setText(questionList.get(currentQuestionIndex).getAnswer());
+        }else{
+            //all questions finished. Simply repeat questions.
+            Collections.shuffle(questionList);
+            currentQuestionIndex = 0;
+        }
+
     }
 
 
@@ -170,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onAnimationEnd(Animation animation) {
 
-
+                ableToClick = true;
 
             }
 
@@ -182,6 +189,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void ShakeAnimation(){
+        ableToClick = false;
         Animation shake = AnimationUtils.loadAnimation(MainActivity.this,
                 R.anim.shake);
 
@@ -215,6 +223,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         currentQuestionIndex++;
         UpdateQuestion();
         ableToClick = true;
+
+        if(countdown != null) countdown.cancel();
 
         countdown = new  CountDownTimer(7000, 1000) {
 
